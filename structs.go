@@ -1,24 +1,18 @@
-package structs
+package main
 
 type Event struct {
   Id int64
   EventName string
   RoomName string
   Description string
-  Items Item[]
+  Items string
   Major int16
-  Date datetime
+  Date string
 }
 
 type User struct {
   Id int64
   UserName string
   Profile string
-
-}
-
-type Item struct {
-
-
 
 }

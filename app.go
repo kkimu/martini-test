@@ -5,29 +5,19 @@ import (
   _ "github.com/go-sql-driver/mysql"
   "github.com/jinzhu/gorm"
   "github.com/martini-contrib/render"
-  "fmt"
+  //"fmt"
 	"net/http"
+	"strings"
+	"regexp"
 )
+// The one and only martini instance.
+var m *martini.Martini
 
-type Event struct {
-  Id int64
-  EventName string
-  RoomName string
-  Description string
-  Items string
-  Major int16
-  Date string
-}
-
-type User struct {
-  Id int64
-  UserName string
-  Profile string
-
-}
+var db gorm.DB
 
 func main() {
-  db, err := gorm.Open("mysql", "root:pass@tcp(127.0.0.1:3306)/airmeet?parseTime=True")
+	var err error
+  db, err = gorm.Open("mysql", "root:pass@tcp(127.0.0.1:3306)/airmeet?parseTime=True&loc=Japan")
 
   if err != nil {
     panic(err)
@@ -35,23 +25,57 @@ func main() {
   }
 
 	db.DB()
-  m := martini.Classic()
 
-  m.Use(render.Renderer())
-
-  m.Get("/", func(r render.Render) {
+  m = martini.New()
+	// Setup middleware
+  m.Use(martini.Recovery())
+	m.Use(martini.Logger())
+	m.Use(MapEncoder)
+	// Setup routes()
+	r := martini.NewRouter()
+  r.Get("/", func(r render.Render) {
     r.JSON(200, map[string]interface{}{"hello": "world!"})
   })
 
-	m.Post("/registerEvent", func(req *http.Request,r render.Render) {
-		event := Event{
-	    EventName:	req.FormValue("eventName"),
-			RoomName:	req.FormValue("roomName"),
-			Description: req.FormValue("description"),
-			Items: req.FormValue("items"),
-	  }
-		fmt.Printf("a")
-		r.JSON(200, event)
-	})
+	r.Post("/registerEvent", RegisterEvent)
+
+	// Add the router action
+	m.Action(r.Handle)
   m.Run()
+}
+
+
+// The regex to check for the requested format (allows an optional trailing
+// slash).
+var rxExt = regexp.MustCompile(`(\.(?:xml|text|json))\/?$`)
+
+// MapEncoder intercepts the request's URL, detects the requested format,
+// and injects the correct encoder dependency for this request. It rewrites
+// the URL to remove the format extension, so that routes can be defined
+// without it.
+func MapEncoder(c martini.Context, w http.ResponseWriter, r *http.Request) {
+	// Get the format extension
+	matches := rxExt.FindStringSubmatch(r.URL.Path)
+	ft := ".json"
+	if len(matches) > 1 {
+		// Rewrite the URL without the format extension
+		l := len(r.URL.Path) - len(matches[1])
+		if strings.HasSuffix(r.URL.Path, "/") {
+			l--
+		}
+		r.URL.Path = r.URL.Path[:l]
+		ft = matches[1]
+	}
+	// Inject the requested encoder
+	switch ft {
+	case ".xml":
+		c.MapTo(xmlEncoder{}, (*Encoder)(nil))
+		w.Header().Set("Content-Type", "application/xml")
+	case ".text":
+		c.MapTo(textEncoder{}, (*Encoder)(nil))
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	default:
+		c.MapTo(jsonEncoder{}, (*Encoder)(nil))
+		w.Header().Set("Content-Type", "application/json")
+	}
 }
