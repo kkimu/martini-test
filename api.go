@@ -1,9 +1,10 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"net/http"
   "time"
+  "errors"
 	//"github.com/go-martini/martini"
 
 )
@@ -12,10 +13,7 @@ import (
 func RegisterEvent(r *http.Request, enc Encoder) string {
   event, err := getParams(r)
   if err != nil {
-    return Must(enc.Encode(Error{
-        Message: err,
-        Code: 400,
-      }))
+    return Must(enc.Encode(NewError(400, fmt.Sprintf("%s", err))))
   }
   event.Major = 1111
   event.CreatedAt = time.Now()
@@ -26,20 +24,19 @@ func RegisterEvent(r *http.Request, enc Encoder) string {
 func getParams(r *http.Request) (*Event, error) {
   en,rn,desc,items := r.FormValue("eventName"),r.FormValue("roomName"),r.FormValue("description"),r.FormValue("items")
   var err error
-  if en == nil {
-    err := "Error: eventName is missing"
+  if en == "" {
+    return nil, errors.New("Error: eventName is missing")
   }
-  if rm == nil {
-    err := "Error: roomName is missing"
+  if items == "" {
+    return nil,errors.New("Error: items is missing")
   }
   if err != nil {
     return nil, err
-  } else {
-    return &Event{
+  }
+  return &Event{
       EventName: en,
       RoomName:	rn,
       Description: desc,
       Items: items,
-    }, nil
-  }
+  }, nil
 }

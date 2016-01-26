@@ -19,8 +19,3 @@ type User struct {
   UserName string
   Profile string
 }
-
-type Error struct {
-  Message string
-  Code int
-}
