@@ -1,5 +1,9 @@
 package main
 
+import(
+    "time"
+)
+
 type Event struct {
   Id int64
   EventName string
@@ -7,12 +11,16 @@ type Event struct {
   Description string
   Items string
   Major int16
-  Date string
+  CreatedAt time.Time
 }
 
 type User struct {
   Id int64
   UserName string
   Profile string
+}
 
+type Error struct {
+  Message string
+  Code int
 }

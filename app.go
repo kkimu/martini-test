@@ -2,8 +2,6 @@ package main
 
 import (
   "github.com/go-martini/martini"
-  _ "github.com/go-sql-driver/mysql"
-  "github.com/jinzhu/gorm"
   "github.com/martini-contrib/render"
   //"fmt"
 	"net/http"
@@ -13,18 +11,8 @@ import (
 // The one and only martini instance.
 var m *martini.Martini
 
-var db gorm.DB
 
-func main() {
-	var err error
-  db, err = gorm.Open("mysql", "root:pass@tcp(127.0.0.1:3306)/airmeet?parseTime=True&loc=Japan")
-
-  if err != nil {
-    panic(err)
-    return
-  }
-
-	db.DB()
+func init() {
 
   m = martini.New()
 	// Setup middleware
@@ -41,9 +29,10 @@ func main() {
 
 	// Add the router action
 	m.Action(r.Handle)
-  m.Run()
 }
-
+func main() {
+	m.Run()
+}
 
 // The regex to check for the requested format (allows an optional trailing
 // slash).
