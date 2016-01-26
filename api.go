@@ -9,9 +9,10 @@ import (
 
 )
 
-// GetAlbums returns the list of albums (possibly filtered).
+// RegisterEvent return the major id
 func RegisterEvent(r *http.Request, enc Encoder) string {
-  event, err := getParams(r)
+  event, err := getPostEvent(r)
+  fmt.Printf("%s\n",err)
   if err != nil {
     return Must(enc.Encode(NewError(400, fmt.Sprintf("%s", err))))
   }
@@ -21,22 +22,28 @@ func RegisterEvent(r *http.Request, enc Encoder) string {
 	return Must(enc.Encode(event))
 }
 
-func getParams(r *http.Request) (*Event, error) {
+// Parse the request body, check input data
+func getPostEvent(r *http.Request) (*Event, error) {
   en,rn,desc,items := r.FormValue("eventName"),r.FormValue("roomName"),r.FormValue("description"),r.FormValue("items")
-  var err error
+  //var err error
   if en == "" {
     return nil, errors.New("Error: eventName is missing")
   }
   if items == "" {
-    return nil,errors.New("Error: items is missing")
+    return nil, errors.New("Error: items is missing")
   }
-  if err != nil {
-    return nil, err
-  }
+
   return &Event{
       EventName: en,
       RoomName:	rn,
       Description: desc,
       Items: items,
   }, nil
+}
+
+func checkString(s string) error {
+  if s == "" {
+    return errors.New("missing")
+  }
+  return nil
 }
