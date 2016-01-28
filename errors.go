@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
+  "fmt"
 )
 
 const (
 	// Error codes
-	ErrCodeNotExist      = 1
-	ErrCodeAlreadyExists = 2
+  ErrCodeNotExist      = 1
+  ErrCodeAlreadyExists = 2
 )
 
 // The serializable Error structure.
@@ -26,4 +26,13 @@ func NewError(code int, msg string) *Error {
 		Code:    code,
 		Message: msg,
 	}
+}
+
+type Success struct {
+  Results interface{} `json:"results"`
+  Code int
+}
+
+type MajorMessage struct {
+  Major int
 }

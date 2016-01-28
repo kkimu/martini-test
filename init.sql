@@ -9,5 +9,7 @@ create table events(
   description varchar(64),
   items varchar(64),
   major int(5),
-  created_at datetime
+  active bit(1) default b'1',
+  created_at datetime,
+  deleted_at datetime
 )

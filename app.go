@@ -1,9 +1,9 @@
 package main
 
 import (
-  "github.com/go-martini/martini"
-  "github.com/martini-contrib/render"
-  //"fmt"
+	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
+	//"fmt"
 	"net/http"
 	"strings"
 	"regexp"
@@ -30,6 +30,7 @@ func init() {
 	// Add the router action
 	m.Action(r.Handle)
 }
+
 func main() {
 	m.Run()
 }
