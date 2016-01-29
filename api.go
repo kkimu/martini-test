@@ -16,7 +16,7 @@ func RegisterEvent(r *http.Request, enc Encoder) string {
   }
 
   //event.Major = 1111
-  event.CreatedAt = time.Now()
+
   AddEvent(event)
 	return Must(enc.Encode(event))
 }
@@ -31,5 +31,7 @@ func getPostEvent(r *http.Request) *Event {
       RoomName:	rn,
       Description: desc,
       Items: items,
+      Active: true,
+      CreatedAt: time.Now(),
   }
 }
